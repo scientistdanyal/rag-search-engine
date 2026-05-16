@@ -3,13 +3,14 @@ from .search_utils import (
     DEAFAULT_SEARCH_LIMIT, 
     load_stopwords, 
     CACHE_DIR,
+    TERM_FREQUENCIES_PATH,
     )
 import string
 from nltk.stem import PorterStemmer
 import pickle
-from collections import defaultdict
+from collections import defaultdict, Counter
 import os
-
+import math
 
 
 
@@ -20,6 +21,8 @@ class InvertedIndex:
         self.docmap: dict[int, dict] = {}
         self.index_path = os.path.join(CACHE_DIR, "index.pkl")
         self.docmap_path = os.path.join(CACHE_DIR, "docmap.pkl")
+        self.term_frequencies = defaultdict(Counter)
+
 
     
     
@@ -38,6 +41,9 @@ class InvertedIndex:
             pickle.dump(self.index, f)
         with open(self.docmap_path, 'wb') as f:
             pickle.dump(self.docmap, f)
+        
+        with open(TERM_FREQUENCIES_PATH, 'wb') as f:
+            pickle.dump(self.term_frequencies, f)
 
     
     def load(self) -> None:
@@ -46,21 +52,46 @@ class InvertedIndex:
         with open(self.docmap_path, 'rb') as f:
             self.docmap = pickle.load(f)
 
+        with open(TERM_FREQUENCIES_PATH, 'rb') as f:
+            self.term_frequencies = pickle.load(f)
+
 
 
     def get_documents(self, term: str)->list[int]:
         doc_ids = self.index.get(term, set())
-        return sorted(list[doc_ids])
+        return sorted(list(doc_ids))
 
     def __add_document(self, doc_id: int, text: str)->None:
         tokens = tokenize_text(text)
         for token in tokens:
-            for token in tokens:
-                self.index[token].add(doc_id)
+            self.index[token].add(doc_id) 
+        self.term_frequencies[doc_id].update(tokens)    
 
 
+    def get_tf(self, doc_id: int, term: str) -> int:
+        tokens = tokenize_text(term)
+        if len(tokens) != 1:
+            raise ValueError("term must be a single token")
+        
+        token = tokens[0]
+        return self.term_frequencies[doc_id][token]
 
 
+    def get_idf(self, term: str) -> float:
+        tokens = tokenize_text(term)
+        if len(tokens) != 1:
+            raise ValueError("term must be a single token")
+        
+        token = tokens[0]
+        doc_count = len(self.docmap)
+        term_doc_count = len(self.index[token])
+        return math.log((doc_count) / (term_doc_count + 1))
+
+    def get_tf_idf(self, doc_id: int, term: str) -> float:
+        tf = self.get_tf(doc_id, term)
+        idf = self.get_idf(term)
+        return tf * idf
+    
 def build_command() -> None:
     idx = InvertedIndex()
     idx.build()
@@ -117,3 +148,24 @@ def tokenize_text(text: str) -> list[str]:
     stemmed_words = [stemmer.stem(word) for word in valid_words]
     return stemmed_words
 
+
+
+def tf_command(doc_id: int, term: str) -> int:
+    idx = InvertedIndex()
+    idx.load()
+    return idx.get_tf(doc_id, term)
+
+
+
+
+def idf_command(term: str) -> float:
+    idx = InvertedIndex()
+    idx.load()
+    return idx.get_idf(term)
+
+
+def tfidf_command(doc_id: int, term: str) -> float:
+    idx = InvertedIndex()
+    idx.load()
+    return idx.get_tf_idf(doc_id, term)
+    

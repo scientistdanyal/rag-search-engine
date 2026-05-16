@@ -10,6 +10,7 @@ STOP_WORDS = os.path.join(PROJECT_ROOT, "data", "stopwords.txt")
 
 CACHE_DIR = os.path.join(PROJECT_ROOT, "cache")
 
+TERM_FREQUENCIES_PATH = os.path.join(PROJECT_ROOT, "cache", "term_frequencies.pkl")
 
 def load_stopwords()->list[str]:
     with open(STOP_WORDS, "r") as file:
