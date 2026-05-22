@@ -6,6 +6,7 @@ from .search_utils import (
     TERM_FREQUENCIES_PATH,
     BM25_K1,
     BM25_B,
+    format_search_result,
     )
 import string
 from nltk.stem import PorterStemmer
@@ -149,10 +150,10 @@ class InvertedIndex:
         for doc_id, score in sorted_docs[:limit]:
             doc = self.docmap[doc_id]
             formatted_result = format_search_result(
-                doc_id = doc['id'],
-                title = doc['title'],
-                description = doc['description'],
-                score = score,
+                doc_id=doc["id"],
+                title=doc["title"],
+                document=doc["description"],
+                score=score,
             )
             results.append(formatted_result)
         return results
