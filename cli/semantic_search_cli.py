@@ -1,6 +1,7 @@
 import argparse
 from ast import Pass
 from lib.sement_search import (
+    chunk_text,
     verify_model,
     embed_text,
     verify_embeddings,
@@ -25,6 +26,13 @@ def main()->None:
     search_parser = subparsers.add_parser("search", help="Search query")
     search_parser.add_argument("query", type=str, help="Text to be embedded")
     search_parser.add_argument("--limit", type=int, default=5, help="Number of results to return")
+
+
+    chunk_parser = subparsers.add_parser("chunk", help="Split text into fixed-size chunks")
+    chunk_parser.add_argument(
+        "--chunk-size", type=int, default=200, help="Size of each chunk"
+    )
+
     args = parser.parse_args()
 
 
@@ -40,6 +48,9 @@ def main()->None:
             embed_query_text(args.query)
         case "search":
             semantic_search(args.query, args.limit)
+
+        case "chunk":
+            chunk_text(args.text, args.chunk_size)
 
         case _:
             parser.print_help()
