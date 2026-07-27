@@ -29,8 +29,12 @@ def main()->None:
 
 
     chunk_parser = subparsers.add_parser("chunk", help="Split text into fixed-size chunks")
+    chunk_parser.add_argument("text", type=str, help="Text to be split")
     chunk_parser.add_argument(
         "--chunk-size", type=int, default=200, help="Size of each chunk"
+    )
+    chunk_parser.add_argument(
+        ""
     )
 
     args = parser.parse_args()
