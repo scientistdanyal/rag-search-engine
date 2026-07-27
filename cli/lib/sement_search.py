@@ -3,7 +3,7 @@ import os
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
-from .search_utils import CACHE_DIR, DEAFAULT_SEARCH_LIMIT, load_movies,DEFAULT_CHUNK_SIZE
+from .search_utils import CACHE_DIR, DEAFAULT_SEARCH_LIMIT, load_movies, DEFAULT_CHUNK_SIZE, DEFAULT_CHUNK_OVERLAP
 
 MOVIE_EMBEDDINGS_PATH = os.path.join(CACHE_DIR, "movie_embeddings.npy")
 
@@ -141,7 +141,11 @@ def semantic_search(query, limit=DEAFAULT_SEARCH_LIMIT):
 
 
 
-def fixed_size_chunking(text: str, chunk_size: int = DEFAULT_CHUNK_SIZE) -> list[str]:
+def fixed_size_chunking(
+        text: str,
+        chunk_size: int = DEFAULT_CHUNK_SIZE,
+        overlap: int = DEFAULT_CHUNK_OVERLAP
+) -> list[str]:
     words = text.split()
     chunks = []
 
@@ -149,13 +153,19 @@ def fixed_size_chunking(text: str, chunk_size: int = DEFAULT_CHUNK_SIZE) -> list
     i = 0
     while i < n_words:
         chunk_words = words[i : i + chunk_size]
+        if chunks and len(chunk_words) <= overlap:
+            break
         chunks.append(" ".join(chunk_words))
-        i += chunk_size
+        i += chunk_size - overlap
 
     return chunks
 
-def chunk_text(text: str, chunk_size: int = DEFAULT_CHUNK_SIZE) -> None:
-    chunks = fixed_size_chunking(text, chunk_size)
+
+
+
+
+def chunk_text(text: str, chunk_size: int = DEFAULT_CHUNK_SIZE, overlap: int = DEFAULT_CHUNK_OVERLAP) -> None:
+    chunks = fixed_size_chunking(text, chunk_size, overlap)
     print(f"Chunking {len(text)} characters")
     for i, chunk in enumerate(chunks):
         print(f"{i+1}. {chunk}")
