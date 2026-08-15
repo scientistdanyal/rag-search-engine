@@ -1,6 +1,6 @@
 from .search_utils import (
     load_movies, 
-    DEAFAULT_SEARCH_LIMIT, 
+    DEFAULT_SEARCH_LIMIT, 
     load_stopwords, 
     CACHE_DIR,
     TERM_FREQUENCIES_PATH,
@@ -133,7 +133,7 @@ class InvertedIndex:
         idf = self.get_bm25_idf(term)
         return tf * idf
     
-    def bm25_search(self, query: str, limit: int = DEAFAULT_SEARCH_LIMIT) -> list[dict]:
+    def bm25_search(self, query: str, limit: int = DEFAULT_SEARCH_LIMIT) -> list[dict]:
         query_tokens = tokenize_text(query)
         scores = {}
         
@@ -175,7 +175,7 @@ def build_command() -> None:
 
 
 
-def search_command(query: str, limit: int = DEAFAULT_SEARCH_LIMIT)->list[dict]:
+def search_command(query: str, limit: int = DEFAULT_SEARCH_LIMIT)->list[dict]:
 
     movies = load_movies()
     idx = InvertedIndex()
@@ -258,7 +258,7 @@ def bm25_tf_command(doc_id: int, term: str, k1: float = BM25_K1, b: float = BM25
     return idx.get_bm25_tf(doc_id, term, k1, b)
 
 
-def bm25_search_command(query: str, limit: int = DEAFAULT_SEARCH_LIMIT) -> list[dict]:
+def bm25_search_command(query: str, limit: int = DEFAULT_SEARCH_LIMIT) -> list[dict]:
     idx = InvertedIndex()
     idx.load()
     return idx.bm25_search(query, limit)

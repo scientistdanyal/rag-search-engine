@@ -13,7 +13,7 @@ from lib.keyword_search import (
 from lib.search_utils import (
     BM25_K1,
     BM25_B,
-    DEAFAULT_SEARCH_LIMIT,
+    DEFAULT_SEARCH_LIMIT,
 )
 
 
@@ -64,7 +64,7 @@ def main()->None:
         "bm25search", help="Search movies using BM25"
     )
     bm25search_parser.add_argument("query", type=str, help="Search query")
-    bm25search_parser.add_argument("limit", type=int, nargs="?", default=DEAFAULT_SEARCH_LIMIT, help="Limit the number of results")
+    bm25search_parser.add_argument("limit", type=int, nargs="?", default=DEFAULT_SEARCH_LIMIT, help="Limit the number of results")
 
     args = parser.parse_args()
 

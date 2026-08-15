@@ -1,14 +1,16 @@
 import json
 import os
-from typing import Any
+from typing import Any, TypedDict
 
 SCORE_PRECISION = 3
-DEAFAULT_SEARCH_LIMIT = 5
+DEFAULT_SEARCH_LIMIT = 5
+DEAFAULT_SEARCH_LIMIT = DEFAULT_SEARCH_LIMIT  # alias for older imports
 BM25_K1 = 1.5
 BM25_B = 0.75
 
 DEFAULT_CHUNK_SIZE = 200
-DEFAULT_CHUNK_OVERLAP = 1
+DEFAULT_CHUNK_OVERLAP = 0
+DEFAULT_SEMANTIC_CHUNK_SIZE = 4
 
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -18,6 +20,15 @@ STOP_WORDS = os.path.join(PROJECT_ROOT, "data", "stopwords.txt")
 CACHE_DIR = os.path.join(PROJECT_ROOT, "cache")
 
 TERM_FREQUENCIES_PATH = os.path.join(PROJECT_ROOT, "cache", "term_frequencies.pkl")
+MOVIE_EMBEDDINGS_PATH = os.path.join(CACHE_DIR, "movie_embeddings.npy")
+CHUNK_EMBEDDINGS_PATH = os.path.join(CACHE_DIR, "chunk_embeddings.npy")
+CHUNK_METADATA_PATH = os.path.join(CACHE_DIR, "chunk_metadata.json")
+
+
+class Movie(TypedDict):
+    id: int
+    title: str
+    description: str
 
 
 def format_search_result(
