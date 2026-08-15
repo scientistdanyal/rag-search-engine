@@ -318,7 +318,23 @@ def semantic_chunk(
     max_chunk_size: int = DEFAULT_SEMANTIC_CHUNK_SIZE,
     overlap: int = DEFAULT_CHUNK_OVERLAP,
 ) -> list[str]:
+    text = text.strip()
+    if not text:
+        return []
+
     sentences = re.split(r"(?<=[.!?])\s+", text)
+    # Single sentence with no ending punctuation → keep whole text
+    if len(sentences) == 1 and not sentences[0].endswith((".", "!", "?")):
+        sentences = [text]
+
+    # strip each sentence: drop empties
+    cleaned = []
+    for sentence in sentences:
+        sentence = sentence.strip()
+        if sentence:
+            cleaned.append(sentence)
+    
+    sentences = cleaned
     chunks = []
     i = 0
     n_sentences = len(sentences)
