@@ -1,7 +1,7 @@
 import argparse
 from lib.hybrid_search import HybridSearch, normalize_scores
 from lib.search_utils import load_movies
-from llm import enhance_query_spell, enhance_query_rewrite, enhance_query_expand
+from llm import enhance_query_spell, enhance_query_rewrite, enhance_query_expand, rerank_individual, rerank_batch, rerank_cross_encoder
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Hybrid Search CLI")
@@ -60,6 +60,12 @@ def main() -> None:
     choices=["spell", "rewrite", "expand"],
     help="Query enhancement method: spell (fix typos) or rewrite (improve clarity)",
 )
+    rrf_parser.add_argument(
+        "--rerank-method",
+        type=str,
+        choices=["individual", "batch", "cross_encoder"],
+        help="Rerank method: individual (rerank each document individually), batch (rerank documents in batches), cross_encoder (rerank documents using cross-encoder)"
+    )
     args = parser.parse_args()
 
     match args.command:
@@ -107,7 +113,28 @@ def main() -> None:
             documents = load_movies()
             searcher = HybridSearch(documents)
             results = searcher.rrf_search(query, args.k, args.limit)
-
+            if args.rerank_method == "individual":
+                print(
+                    f"Re-ranking top {len(results)} results using individual method..."
+                )
+                results = rerank_individual(query, results)
+                results = results[: args.limit]
+            elif args.rerank_method == "batch":
+                print(
+                    f"Re-ranking top {len(results)} results using batch method..."
+                )
+                results = rerank_batch(query, results)[: args.limit]
+                print(
+                    f"Reciprocal Rank Fusion Results for '{query}' (k={args.k}):\n"
+                )
+            elif args.rerank_method == "cross_encoder":
+                print(
+                    f"Reranking top {len(results)} results using cross_encoder method...\n"
+                )
+                results = rerank_cross_encoder(query, results)[: args.limit]
+                print(
+                    f"Reciprocal Rank Fusion Results for '{query}' (k={args.k}):\n"
+                )
             for i, result in enumerate(results, start=1):
                 print(f"{i}. {result['title']}")
                 print(f"  RRF Score: {result['rrf_score']:.3f}")
